@@ -27,6 +27,21 @@ public class AddressBookService implements AddressBookInterface {
 		System.out.println(addressBook.getContacts().toString());
 	}
 
+	@Override
+	public void editContacts(AddressBook addressBook, Contacts contact) {
+
+		List<Contacts> contacts = addressBook.getContacts();
+		contacts.add(contact);
+		addressBook.setContacts(contacts);
+	}
+
+	@Override
+	public void deleteContacts(int index, AddressBook addressBook) {
+		List<Contacts> contacts = addressBook.getContacts();
+		contacts.remove(index);
+		addressBook.setContacts(contacts);
+	}
+
 	public Contacts getName(final Scanner sc) {
 		Contacts contact = new Contacts();
 		System.out.println("Enter the firstName:");
@@ -37,10 +52,9 @@ public class AddressBookService implements AddressBookInterface {
 	}
 
 	public Contacts getDetails(final Scanner sc) {
-		Contacts contact = new Contacts();
 
 		// Take user-input
-		contact = getName(sc);
+		Contacts contact = getName(sc);
 		System.out.println("Enter the Adhaar number:");
 		contact.setAdhaarNumber(sc.next().trim());
 		System.out.println("Enter the Address:");
@@ -74,5 +88,23 @@ public class AddressBookService implements AddressBookInterface {
 			contact.setEmailId(email);
 		}
 		return contact;
+	}
+
+	public int searchForContact(final Scanner sc, AddressBook addressBook) {
+		List<Contacts> contacts = addressBook.getContacts();
+
+		Contacts contact = getName(sc);
+		System.out.println("Enter the Adhaar number:");
+		contact.setAdhaarNumber(sc.next().toLowerCase().trim());
+
+		// Check if the key exists if so take the whole input from user all-over
+		if (contacts.contains(contact)) {
+			System.out.println("found contact matching your search!!");
+			return contacts.indexOf(contact);
+		} else {
+			System.out.println("No contact found!!");
+			return -1;
+		}
+
 	}
 }

@@ -110,4 +110,31 @@ public class Contacts {
 				+ ",phoneNumbers:" + Arrays.toString(this.mobNo.toArray()) + ",emails:"
 				+ Arrays.toString(this.emailId.toArray()) + "}";
 	}
+
+	@Override
+	public boolean equals(Object object) {
+		boolean result = false;
+		if (object == null || object.getClass() != getClass()) {
+			result = false;
+		} else {
+			Contacts contact = (Contacts) object;
+			if (this.firstName.equals(contact.getFirstName()) && this.lastName.equals(contact.getLastName())
+					&& this.adhaarNumber.equals(contact.getAdhaarNumber())) {
+				result = true;
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+
+		result = prime * result + (this.firstName != null ? this.firstName.hashCode() : 0);
+		result = prime * result + (this.lastName != null ? this.lastName.hashCode() : 0);
+		result = prime * result + (this.adhaarNumber != null ? this.adhaarNumber.hashCode() : 0);
+
+		return result;
+	}
 }
