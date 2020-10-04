@@ -80,5 +80,8 @@ public class AddressBookMain {
 
 		// Print the addressBookMap
 		System.out.println(addressBookMap.toString());
+
+		// Search person by city or state across multiple addressBook
+		addressBookService.searchContactByCityOrState(sc, addressBookMap);
 	}
 }
