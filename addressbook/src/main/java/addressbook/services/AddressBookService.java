@@ -27,6 +27,22 @@ public class AddressBookService implements AddressBookInterface {
 		addressBook.setContacts(contacts);
 	}
 
+	public void addContactsStateCityWise(Map<String, List<Contacts>> cityMap, Map<String, List<Contacts>> stateMap,
+			Contacts contact) {
+
+		cityMap.computeIfAbsent(contact.getCity(), key -> new ArrayList<>()).add(contact);
+		stateMap.computeIfAbsent(contact.getState(), key -> new ArrayList<>()).add(contact);
+	}
+
+	public void readAddressBooks(Map<String, List<Contacts>> cityMap, Map<String, List<Contacts>> stateMap,
+			Map<String, AddressBook> addressBookMap) {
+		for (String addressBook : addressBookMap.keySet()) {
+			for (Contacts contact : addressBookMap.get(addressBook).getContacts()) {
+				addContactsStateCityWise(cityMap, stateMap, contact);
+			}
+		}
+	}
+
 	@Override
 	public void displayAddressBook(AddressBook addressBook) {
 		System.out.println(addressBook.getContacts().toString());
@@ -160,11 +176,11 @@ public class AddressBookService implements AddressBookInterface {
 			System.out.println("Searching in addressBook : " + key);
 
 			System.out.println("Searching by state :");
-			contacts = searchContactByCondition(addressBoookMap.get(key), contact, STATE);
+			contacts = searchContactByCondition(addressBoookMap.get(key).getContacts(), contact, STATE);
 			if (contacts.size() > 0) {
 				System.out.println(contacts.toString());
 				System.out.println("Searching by city : ");
-				contacts = searchContactByCondition(addressBoookMap.get(key), contact, CITY);
+				contacts = searchContactByCondition(addressBoookMap.get(key).getContacts(), contact, CITY);
 				System.out.println(contacts.toString());
 			} else
 				System.out.println("No contact found by state and city");
@@ -172,18 +188,18 @@ public class AddressBookService implements AddressBookInterface {
 		}
 	}
 
-	public List<Contacts> searchContactByCondition(AddressBook addressBook, Contacts contact, int flag) {
+	public List<Contacts> searchContactByCondition(List<Contacts> contactsList, Contacts contact, int flag) {
 		List<Contacts> contacts = null;
 		switch (flag) {
 		case STATE:
-			contacts = addressBook.getContacts().stream()
+			contacts = contactsList.stream()
 					.filter(cont -> cont.getFirstName().equals(contact.getFirstName())
 							&& cont.getLastName().equals(contact.getLastName())
 							&& cont.getState().equals(contact.getState()))
 					.collect(Collectors.toList());
 			break;
 		case CITY:
-			contacts = addressBook.getContacts().stream()
+			contacts = contactsList.stream()
 					.filter(cont -> cont.getFirstName().equals(contact.getFirstName())
 							&& cont.getLastName().equals(contact.getLastName())
 							&& cont.getCity().equals(contact.getCity()))
@@ -192,6 +208,39 @@ public class AddressBookService implements AddressBookInterface {
 		}
 
 		return contacts;
+	}
+
+	public void searchPersonInCityState(final Scanner sc, Map<String, List<Contacts>> cityMap,
+			Map<String, List<Contacts>> stateMap) {
+		Contacts contact = getName(sc);
+		System.out.println("Enter the city:");
+		contact.setCity(sc.next().toLowerCase().trim());
+		System.out.println("Enter the state:");
+		contact.setState(sc.next().toLowerCase().trim());
+
+		// Search by state
+		if (stateMap.containsKey(contact.getState())) {
+			System.out.println("Searching by state :");
+			List<Contacts> contacts = searchContactByCondition(stateMap.get(contact.getState()), contact, STATE);
+			if (contacts.size() > 0) {
+				System.out.println("contacts found : " + contacts.size());
+				System.out.println(contacts.toString());
+			} else
+				System.out.println("No contact found by state");
+		} else
+			System.out.println("No contact found by state");
+
+		// Search by city
+		if (cityMap.containsKey(contact.getCity())) {
+			System.out.println("Searching by city : ");
+			List<Contacts> contacts = searchContactByCondition(cityMap.get(contact.getCity()), contact, CITY);
+			if (contacts.size() > 0) {
+				System.out.println("contacts found : " + contacts.size());
+				System.out.println(contacts.toString());
+			} else
+				System.out.println("No contact found by city");
+		} else
+			System.out.println("No contact found by city");
 	}
 
 }
