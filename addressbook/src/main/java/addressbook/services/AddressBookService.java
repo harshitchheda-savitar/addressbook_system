@@ -235,6 +235,7 @@ public class AddressBookService implements AddressBookInterface {
 			System.out.println("Searching by city : ");
 			List<Contacts> contacts = searchContactByCondition(cityMap.get(contact.getCity()), contact, CITY);
 			if (contacts.size() > 0) {
+				//print the count of contacts
 				System.out.println("contacts found : " + contacts.size());
 				System.out.println(contacts.toString());
 			} else
