@@ -1,10 +1,15 @@
 package addressbook;
 
+import java.util.Scanner;
+
 import addressbook.models.AddressBook;
 import addressbook.models.Contacts;
 import addressbook.services.AddressBookService;
 
 public class AddressBookMain {
+
+	static final int ADD = 1;
+
 	public static void main(String[] args) {
 		AddressBookService addressBookService = new AddressBookService();
 
@@ -12,18 +17,28 @@ public class AddressBookMain {
 		AddressBook addressBook = new AddressBook();
 		addressBookService.initializeAddressBook(addressBook);
 
-		// Get details for the contact
-		Contacts contact = new Contacts();
-		contact.setFirstName("harshit");
-		contact.setLastName("chheda");
-		contact.setAddress("somewhere");
-		contact.setCity("Mumbai");
-		contact.setState("Maharashtra");
-		contact.setZip("101010");
-		contact.setAdhaarNumber("123512341234");
+		Scanner sc = new Scanner(System.in);
+		int inputOption;
 
-		// Add contact
-		addressBookService.addContacts(addressBook, contact);
+		boolean flag = true;
+		while (flag) {
+			System.out.println("Enter the option[1-ADD, 0-EXIT]:");
+			inputOption = sc.nextInt();
+			switch (inputOption) {
+			case ADD:
+				// get details of the contact
+				Contacts contact = addressBookService.getDetails(sc);
+				// add contact to address-book
+				addressBookService.addContacts(addressBook, contact);
+				System.out.println("SuccessFully Added!!!!!");
+				System.out.println();
+				break;
+			default:
+				flag = false;
+				break;
+			}
+
+		}
 
 		// Print the addressBook
 		addressBookService.displayAddressBook(addressBook);
