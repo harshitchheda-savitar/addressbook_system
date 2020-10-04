@@ -36,8 +36,11 @@ public class AddressBookMain {
 			switch (inputOption) {
 			case ADD:
 				Contacts contact = addressBookService.getDetails(sc);
-				addressBookService.addContacts(addressBook, contact);
-				System.out.println("SuccessFully Added!!!!!");
+				if (!addressBookService.checkIfContactExists(contact, addressBook)) {
+					addressBookService.addContacts(addressBook, contact);
+					System.out.println("SuccessFully Added!!!!!");
+				} else
+					System.out.println("Contact already exists!!!!!");
 				System.out.println();
 				break;
 			case EDIT:
