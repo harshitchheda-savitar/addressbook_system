@@ -9,6 +9,7 @@ import addressbook.services.AddressBookService;
 public class AddressBookMain {
 
 	static final int ADD = 1;
+	static final int EDIT = 2;
 
 	public static void main(String[] args) {
 		AddressBookService addressBookService = new AddressBookService();
@@ -22,7 +23,7 @@ public class AddressBookMain {
 
 		boolean flag = true;
 		while (flag) {
-			System.out.println("Enter the option[1-ADD, 0-EXIT]:");
+			System.out.println("Enter the option[1-ADD, 2-EDIT, 0-EXIT]:");
 			inputOption = sc.nextInt();
 			switch (inputOption) {
 			case ADD:
@@ -33,11 +34,23 @@ public class AddressBookMain {
 				System.out.println("SuccessFully Added!!!!!");
 				System.out.println();
 				break;
+			case EDIT:
+				// search for the contact in addressBook
+				int indexOfSearchContact = addressBookService.searchForContact(sc, addressBook);
+				if (indexOfSearchContact != -1) {
+					// get details for the new contact to be added
+					contact = addressBookService.getDetails(sc);
+					// edit the contact in address-book
+					addressBookService.editContacts(addressBook, contact);
+					addressBookService.deleteContacts(indexOfSearchContact, addressBook);
+				}
+				System.out.println("SuccessFully Edited!!!");
+				System.out.println();
+				break;
 			default:
 				flag = false;
 				break;
 			}
-
 		}
 
 		// Print the addressBook
