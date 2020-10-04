@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import addressbook.interfaces.AddressBookInterface;
 import addressbook.models.AddressBook;
 import addressbook.models.Contacts;
 
 public class AddressBookService implements AddressBookInterface {
+
+	private static final int STATE = 1;
+	private static final int CITY = 2;
 
 	@Override
 	public void initializeAddressBook(AddressBook addressBook) {
@@ -141,6 +145,53 @@ public class AddressBookService implements AddressBookInterface {
 	public boolean checkIfContactExists(Contacts contact, AddressBook addressBook) {
 		long count = addressBook.getContacts().stream().filter(cont -> cont.equals(contact)).count();
 		return count > 0;
+	}
+
+	public void searchContactByCityOrState(final Scanner sc, Map<String, AddressBook> addressBoookMap) {
+		Contacts contact = getName(sc);
+		System.out.println("Enter the city:");
+		contact.setCity(sc.next().toLowerCase().trim());
+		System.out.println("Enter the state:");
+		contact.setState(sc.next().toLowerCase().trim());
+
+		List<Contacts> contacts;
+
+		for (String key : addressBoookMap.keySet()) {
+			System.out.println("Searching in addressBook : " + key);
+
+			System.out.println("Searching by state :");
+			contacts = searchContactByCondition(addressBoookMap.get(key), contact, STATE);
+			if (contacts.size() > 0) {
+				System.out.println(contacts.toString());
+				System.out.println("Searching by city : ");
+				contacts = searchContactByCondition(addressBoookMap.get(key), contact, CITY);
+				System.out.println(contacts.toString());
+			} else
+				System.out.println("No contact found by state and city");
+
+		}
+	}
+
+	public List<Contacts> searchContactByCondition(AddressBook addressBook, Contacts contact, int flag) {
+		List<Contacts> contacts = null;
+		switch (flag) {
+		case STATE:
+			contacts = addressBook.getContacts().stream()
+					.filter(cont -> cont.getFirstName().equals(contact.getFirstName())
+							&& cont.getLastName().equals(contact.getLastName())
+							&& cont.getState().equals(contact.getState()))
+					.collect(Collectors.toList());
+			break;
+		case CITY:
+			contacts = addressBook.getContacts().stream()
+					.filter(cont -> cont.getFirstName().equals(contact.getFirstName())
+							&& cont.getLastName().equals(contact.getLastName())
+							&& cont.getCity().equals(contact.getCity()))
+					.collect(Collectors.toList());
+			break;
+		}
+
+		return contacts;
 	}
 
 }
