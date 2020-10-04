@@ -1,6 +1,7 @@
 package addressbook;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -24,6 +25,8 @@ public class AddressBookMain {
 		addressBookService.initializeAddressBook(addressBook);
 
 		Map<String, AddressBook> addressBookMap = new HashMap<>();
+		Map<String, List<Contacts>> cityMap = new HashMap<>();
+		Map<String, List<Contacts>> stateMap = new HashMap<>();
 
 		Scanner sc = new Scanner(System.in);
 		int inputOption;
@@ -81,7 +84,11 @@ public class AddressBookMain {
 		// Print the addressBookMap
 		System.out.println(addressBookMap.toString());
 
-		// Search person by city or state across multiple addressBook
+		// Search person by city or state across multiple addressBook using streams
 		addressBookService.searchContactByCityOrState(sc, addressBookMap);
+
+		addressBookService.readAddressBooks(cityMap, stateMap, addressBookMap);
+		// Search by person by city-state using city/state dictionary
+		addressBookService.searchPersonInCityState(sc, cityMap, stateMap);
 	}
 }
