@@ -121,7 +121,7 @@ public class AddressBookService implements AddressBookInterface {
 			System.out.println();
 		}
 	}
-	
+
 	public boolean addMultipleBooks(final Scanner sc, Map<String, AddressBook> map, AddressBook addressBook) {
 		System.out.println("Give a name to your addressBook");
 		String name = sc.next().trim().toLowerCase();
@@ -138,5 +138,9 @@ public class AddressBookService implements AddressBookInterface {
 		}
 	}
 
+	public boolean checkIfContactExists(Contacts contact, AddressBook addressBook) {
+		long count = addressBook.getContacts().stream().filter(cont -> cont.equals(contact)).count();
+		return count > 0;
+	}
 
 }
