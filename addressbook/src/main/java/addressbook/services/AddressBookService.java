@@ -105,6 +105,20 @@ public class AddressBookService implements AddressBookInterface {
 			System.out.println("No contact found!!");
 			return -1;
 		}
-
 	}
+
+	public void bulkAddContacts(final Scanner sc, AddressBook addressBook) {
+		System.out.println("How many Contacts you want to insert");
+		int count = sc.nextInt();
+		if (count > 0) {
+			for (int i = 0; i < count; i++) {
+				System.out.println("Enter the contact details for person " + (i + 1));
+				Contacts contact = getDetails(sc);
+				addContacts(addressBook, contact);
+			}
+			System.out.println("Successfully Added " + count + " Contacts");
+			System.out.println();
+		}
+	}
+
 }
