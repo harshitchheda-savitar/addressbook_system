@@ -2,6 +2,7 @@ package addressbook.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import addressbook.interfaces.AddressBookInterface;
@@ -120,5 +121,22 @@ public class AddressBookService implements AddressBookInterface {
 			System.out.println();
 		}
 	}
+	
+	public boolean addMultipleBooks(final Scanner sc, Map<String, AddressBook> map, AddressBook addressBook) {
+		System.out.println("Give a name to your addressBook");
+		String name = sc.next().trim().toLowerCase();
+		map.put(name, addressBook);
+
+		System.out.println("Successfully saved your addressBook.... Wanna add more addressBooks !?");
+		System.out.println("1 - yes , 2 - no");
+		switch (sc.nextInt()) {
+		case 1:
+			addressBook.setContacts(new ArrayList<>());
+			return true;
+		default:
+			return false;
+		}
+	}
+
 
 }
