@@ -11,6 +11,7 @@ public class AddressBookMain {
 	static final int ADD = 1;
 	static final int EDIT = 2;
 	static final int DELETE = 3;
+	static final int BULK_ADD = 4;
 
 	public static void main(String[] args) {
 		AddressBookService addressBookService = new AddressBookService();
@@ -24,7 +25,7 @@ public class AddressBookMain {
 
 		boolean flag = true;
 		while (flag) {
-			System.out.println("Enter the option[1-ADD, 2-EDIT , 3-DELETE, 0-EXIT]:");
+			System.out.println("Enter the option[1-ADD, 2-EDIT , 3-DELETE, 4-BULK-ADD, 0-EXIT]:");
 			inputOption = sc.nextInt();
 			switch (inputOption) {
 			case ADD:
@@ -57,6 +58,9 @@ public class AddressBookMain {
 				}
 				System.out.println("SuccessFully Deleted!!!");
 				System.out.println();
+				break;
+			case BULK_ADD:
+				addressBookService.bulkAddContacts(sc, addressBook);
 				break;
 			default:
 				flag = false;
