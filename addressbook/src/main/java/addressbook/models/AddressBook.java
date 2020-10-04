@@ -13,4 +13,9 @@ public class AddressBook {
 		this.contacts = contacts;
 	}
 
+	@Override
+	public String toString() {
+		return this.contacts.toString();
+	}
+
 }
