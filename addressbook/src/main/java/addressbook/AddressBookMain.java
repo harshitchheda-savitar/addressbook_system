@@ -97,5 +97,8 @@ public class AddressBookMain {
 
 		// Sort addressBook by name
 		addressBookService.sortByName(addressBookMap);
+		
+		//sort addressBook by location
+		addressBookService.sortByLocation(addressBookMap);
 	}
 }

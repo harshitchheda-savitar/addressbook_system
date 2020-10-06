@@ -251,4 +251,43 @@ public class AddressBookService implements AddressBookInterface {
 		}
 	}
 
+	public void sortByLocation(Map<String, AddressBook> map) {
+		sortByState(map);
+		sortByCity(map);
+		sortByZipcode(map);
+	}
+
+	private void sortByCity(Map<String, AddressBook> map) {
+		List<Contacts> sortedContacts;
+
+		for (String key : map.keySet()) {
+			sortedContacts = map.get(key).getContacts().stream().sorted(Comparator.comparing(Contacts::getCity))
+					.collect(Collectors.toList());
+
+			System.out.println(sortedContacts.toString());
+		}
+	}
+
+	private void sortByState(Map<String, AddressBook> map) {
+		List<Contacts> sortedContacts;
+
+		for (String key : map.keySet()) {
+			sortedContacts = map.get(key).getContacts().stream().sorted(Comparator.comparing(Contacts::getState))
+					.collect(Collectors.toList());
+
+			System.out.println(sortedContacts.toString());
+		}
+	}
+
+	private void sortByZipcode(Map<String, AddressBook> map) {
+		List<Contacts> sortedContacts;
+
+		for (String key : map.keySet()) {
+			sortedContacts = map.get(key).getContacts().stream().sorted(Comparator.comparing(Contacts::getZip))
+					.collect(Collectors.toList());
+
+			System.out.println(sortedContacts.toString());
+		}
+	}
+
 }
