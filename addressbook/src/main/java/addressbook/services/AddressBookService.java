@@ -1,6 +1,7 @@
 package addressbook.services;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -149,13 +150,7 @@ public class AddressBookService implements AddressBookInterface {
 
 		System.out.println("Successfully saved your addressBook.... Wanna add more addressBooks !?");
 		System.out.println("1 - yes , 2 - no");
-		switch (sc.nextInt()) {
-		case 1:
-			addressBook.setContacts(new ArrayList<>());
-			return true;
-		default:
-			return false;
-		}
+		return sc.nextInt() == 1;
 	}
 
 	public boolean checkIfContactExists(Contacts contact, AddressBook addressBook) {
@@ -235,13 +230,25 @@ public class AddressBookService implements AddressBookInterface {
 			System.out.println("Searching by city : ");
 			List<Contacts> contacts = searchContactByCondition(cityMap.get(contact.getCity()), contact, CITY);
 			if (contacts.size() > 0) {
-				//print the count of contacts
+				// print the count of contacts
 				System.out.println("contacts found : " + contacts.size());
 				System.out.println(contacts.toString());
 			} else
 				System.out.println("No contact found by city");
 		} else
 			System.out.println("No contact found by city");
+	}
+
+	public void sortByName(Map<String, AddressBook> map) {
+		List<Contacts> sortedContacts;
+
+		for (String key : map.keySet()) {
+			sortedContacts = map.get(key).getContacts().stream()
+					.sorted(Comparator.comparing(Contacts::getFirstName).thenComparing(Contacts::getLastName))
+					.collect(Collectors.toList());
+
+			System.out.println(sortedContacts.toString());
+		}
 	}
 
 }

@@ -34,7 +34,7 @@ public class AddressBookMain {
 		boolean flag = true;
 		while (flag) {
 			System.out
-					.println("Enter the option[1-ADD, 2-EDIT , 3-DELETE, 4-BULK-ADD, 5-SAVE_ADD_ADDRESSBOOK, 0-EXIT]:");
+					.println("Enter the option[1-ADD, 2-EDIT , 3-DELETE, 4-BULK-ADD, 5-SAVE_ADD_ADDRESSBOOK 0-EXIT]:");
 			inputOption = sc.nextInt();
 			switch (inputOption) {
 			case ADD:
@@ -74,6 +74,10 @@ public class AddressBookMain {
 				break;
 			case ADD_ADDRESSBOOK:
 				flag = addressBookService.addMultipleBooks(sc, addressBookMap, addressBook);
+				if (flag) {
+					addressBook = new AddressBook();
+					addressBookService.initializeAddressBook(addressBook);
+				}
 				break;
 			default:
 				flag = false;
@@ -90,5 +94,8 @@ public class AddressBookMain {
 		addressBookService.readAddressBooks(cityMap, stateMap, addressBookMap);
 		// Search by person by city-state using city/state dictionary
 		addressBookService.searchPersonInCityState(sc, cityMap, stateMap);
+
+		// Sort addressBook by name
+		addressBookService.sortByName(addressBookMap);
 	}
 }
