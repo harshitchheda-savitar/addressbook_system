@@ -1,11 +1,17 @@
 package addressbook.services;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import addressbook.interfaces.AddressBookInterface;
 import addressbook.models.AddressBook;
@@ -15,6 +21,7 @@ public class AddressBookService implements AddressBookInterface {
 
 	private static final int STATE = 1;
 	private static final int CITY = 2;
+	private static final String HOME = "D:/training/addressbook_system/addressbook/src/main/java/addressbook/resources";
 
 	@Override
 	public void initializeAddressBook(AddressBook addressBook) {
@@ -143,14 +150,37 @@ public class AddressBookService implements AddressBookInterface {
 		}
 	}
 
-	public boolean addMultipleBooks(final Scanner sc, Map<String, AddressBook> map, AddressBook addressBook) {
+	public boolean addMultipleBooks(final Scanner sc, Map<String, AddressBook> map, AddressBook addressBook)
+			throws IOException {
 		System.out.println("Give a name to your addressBook");
 		String name = sc.next().trim().toLowerCase();
 		map.put(name, addressBook);
 
+		Path homePath = Paths.get(HOME + "/" + name + ".txt");
+		addEntryToFile(addressBook, homePath);
+
 		System.out.println("Successfully saved your addressBook.... Wanna add more addressBooks !?");
 		System.out.println("1 - yes , 2 - no");
 		return sc.nextInt() == 1;
+	}
+
+	private void addEntryToFile(AddressBook addressBook, Path filePath) throws IOException {
+		StringBuilder contactString = new StringBuilder();
+		addressBook.getContacts().forEach(contact -> contactString.append("\n").append(contact.toString()));
+		Files.write(filePath, contactString.toString().getBytes(), StandardOpenOption.APPEND,
+				StandardOpenOption.CREATE);
+	}
+
+	public void readFile() throws IOException {
+		Path homePath = Paths.get(HOME);
+		Files.list(homePath).filter(Files::isRegularFile).forEach(file -> {
+			try (Stream<String> addressBook = Files.lines(file)) {
+				System.out.print(file.getFileName());
+				addressBook.forEach(System.out::println);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
 	}
 
 	public boolean checkIfContactExists(Contacts contact, AddressBook addressBook) {
