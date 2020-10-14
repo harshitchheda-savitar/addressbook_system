@@ -1,5 +1,6 @@
 package addressbook;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,7 @@ public class AddressBookMain {
 	static final int BULK_ADD = 4;
 	static final int ADD_ADDRESSBOOK = 5;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		AddressBookService addressBookService = new AddressBookService();
 
 		// initialize an address-book
@@ -73,7 +74,7 @@ public class AddressBookMain {
 				addressBookService.bulkAddContacts(sc, addressBook);
 				break;
 			case ADD_ADDRESSBOOK:
-				flag = addressBookService.addMultipleBooks(sc, addressBookMap, addressBook);
+				addressBookService.addMultipleBooks(sc, addressBookMap, addressBook);
 				if (flag) {
 					addressBook = new AddressBook();
 					addressBookService.initializeAddressBook(addressBook);
@@ -97,8 +98,11 @@ public class AddressBookMain {
 
 		// Sort addressBook by name
 		addressBookService.sortByName(addressBookMap);
-		
-		//sort addressBook by location
+
+		// sort addressBook by location
 		addressBookService.sortByLocation(addressBookMap);
+		
+		//Read the addressBook-list for file-System
+		addressBookService.readFile();
 	}
 }
