@@ -25,7 +25,7 @@ public class AddressBookMain {
 		AddressBook addressBook = new AddressBook();
 		addressBookService.initializeAddressBook(addressBook);
 
-		Map<String, AddressBook> addressBookMap = new HashMap<>();
+		Map<String, AddressBook> addressBookMap;
 		Map<String, List<Contacts>> cityMap = new HashMap<>();
 		Map<String, List<Contacts>> stateMap = new HashMap<>();
 
@@ -34,8 +34,9 @@ public class AddressBookMain {
 
 		boolean flag = true;
 		while (flag) {
-			System.out
-					.println("Enter the option[1-ADD, 2-EDIT , 3-DELETE, 4-BULK-ADD, 5-SAVE_ADD_ADDRESSBOOK 0-EXIT]:");
+			addressBookMap = new HashMap<>();
+
+			System.out.println("Enter option[1-ADD, 2-EDIT , 3-DELETE, 4-BULK-ADD, 5-SAVE_ADD_ADDRESSBOOK 0-EXIT]:");
 			inputOption = sc.nextInt();
 			switch (inputOption) {
 			case ADD:
@@ -86,6 +87,9 @@ public class AddressBookMain {
 			}
 		}
 
+		// Read the addressBook-list for file-System
+		addressBookMap = addressBookService.readContactsFromJsonFile();
+
 		// Print the addressBookMap
 		System.out.println(addressBookMap.toString());
 
@@ -101,8 +105,6 @@ public class AddressBookMain {
 
 		// sort addressBook by location
 		addressBookService.sortByLocation(addressBookMap);
-		
-		//Read the addressBook-list for file-System
-		addressBookService.readFile();
+
 	}
 }

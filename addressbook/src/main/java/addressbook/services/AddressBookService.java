@@ -7,11 +7,14 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.google.gson.Gson;
 
 import addressbook.interfaces.AddressBookInterface;
 import addressbook.models.AddressBook;
@@ -21,7 +24,7 @@ public class AddressBookService implements AddressBookInterface {
 
 	private static final int STATE = 1;
 	private static final int CITY = 2;
-	private static final String HOME = "D:/training/addressbook_system/addressbook/src/main/java/addressbook/resources";
+	private static final String HOME = "D:/training/addressbook_system/addressbook/src/main/java/resources/";
 
 	@Override
 	public void initializeAddressBook(AddressBook addressBook) {
@@ -156,31 +159,48 @@ public class AddressBookService implements AddressBookInterface {
 		String name = sc.next().trim().toLowerCase();
 		map.put(name, addressBook);
 
-		Path homePath = Paths.get(HOME + "/" + name + ".txt");
-		addEntryToFile(addressBook, homePath);
+		Path homePath = Paths.get(HOME + name + ".json");
+		addContactsToJsonFile(addressBook, homePath);
 
 		System.out.println("Successfully saved your addressBook.... Wanna add more addressBooks !?");
 		System.out.println("1 - yes , 2 - no");
 		return sc.nextInt() == 1;
 	}
 
-	private void addEntryToFile(AddressBook addressBook, Path filePath) throws IOException {
+	private void addContactsToJsonFile(AddressBook addressBook, Path filePath) throws IOException {
+
+		Gson gson = new Gson();
 		StringBuilder contactString = new StringBuilder();
-		addressBook.getContacts().forEach(contact -> contactString.append("\n").append(contact.toString()));
-		Files.write(filePath, contactString.toString().getBytes(), StandardOpenOption.APPEND,
-				StandardOpenOption.CREATE);
+		addressBook.getContacts().forEach(contact -> contactString.append("\n").append(gson.toJson(contact)));
+		Files.write(filePath, contactString.toString().getBytes(), StandardOpenOption.CREATE,
+				StandardOpenOption.APPEND);
+
 	}
 
-	public void readFile() throws IOException {
+	public Map<String, AddressBook> readContactsFromJsonFile() throws IOException {
+
+		Map<String, AddressBook> map = new HashMap<>();
 		Path homePath = Paths.get(HOME);
-		Files.list(homePath).filter(Files::isRegularFile).forEach(file -> {
-			try (Stream<String> addressBook = Files.lines(file)) {
-				System.out.print(file.getFileName());
-				addressBook.forEach(System.out::println);
+		Gson gson = new Gson();
+		Files.list(homePath).filter(path -> path.toString().contains(".json")).forEach(file -> {
+			List<Contacts> contacts = new ArrayList<>();
+			try (Stream<String> addressBookStream = Files.lines(file)) {
+
+				addressBookStream.forEach(contact -> {
+					if (!contact.isEmpty()) {
+						Contacts cont = gson.fromJson(contact, Contacts.class);
+						contacts.add(cont);
+					}
+				});
+
+				AddressBook addressBook = new AddressBook();
+				addressBook.setContacts(contacts);
+				map.put(file.getFileName().toString().split(".json")[0], addressBook);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		});
+		return map;
 	}
 
 	public boolean checkIfContactExists(Contacts contact, AddressBook addressBook) {
