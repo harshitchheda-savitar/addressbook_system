@@ -1,17 +1,28 @@
 package addressbook.services;
 
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import com.opencsv.CSVWriter;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+import com.opencsv.bean.StatefulBeanToCsv;
+import com.opencsv.bean.StatefulBeanToCsvBuilder;
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 
 import addressbook.interfaces.AddressBookInterface;
 import addressbook.models.AddressBook;
@@ -21,7 +32,7 @@ public class AddressBookService implements AddressBookInterface {
 
 	private static final int STATE = 1;
 	private static final int CITY = 2;
-	private static final String HOME = "D:/training/addressbook_system/addressbook/src/main/java/addressbook/resources";
+	private static final String HOME = "D:/training/addressbook_system/addressbook/src/main/java/resources/";
 
 	@Override
 	public void initializeAddressBook(AddressBook addressBook) {
@@ -94,28 +105,11 @@ public class AddressBookService implements AddressBookInterface {
 		contact.setState(sc.next().trim());
 		System.out.println("Enter the zipcode:");
 		contact.setZip(sc.next().trim());
+		System.out.println("Enter the mobile number:");
+		contact.setMobNo(sc.next().trim());
+		System.out.println("Enter the emailId:");
+		contact.setEmailId(sc.next().trim());
 
-		System.out.println("How many Numbers you want to insert");
-		int count = sc.nextInt();
-		if (count > 0) {
-			System.out.println("Enter the numbers followed by a new line for each number");
-			List<String> mobNo = new ArrayList<>();
-			for (int i = 0; i < count; i++) {
-				mobNo.add(sc.next().trim());
-			}
-			contact.setMobNo(mobNo);
-		}
-
-		System.out.println("How many emailIds you want to insert");
-		count = sc.nextInt();
-		if (count > 0) {
-			System.out.println("Enter the emailIds followed by a new line for each emailId");
-			List<String> email = new ArrayList<>();
-			for (int i = 0; i < count; i++) {
-				email.add(sc.next().trim());
-			}
-			contact.setEmailId(email);
-		}
 		return contact;
 	}
 
@@ -151,36 +145,53 @@ public class AddressBookService implements AddressBookInterface {
 	}
 
 	public boolean addMultipleBooks(final Scanner sc, Map<String, AddressBook> map, AddressBook addressBook)
-			throws IOException {
+			throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
 		System.out.println("Give a name to your addressBook");
 		String name = sc.next().trim().toLowerCase();
 		map.put(name, addressBook);
 
-		Path homePath = Paths.get(HOME + "/" + name + ".txt");
-		addEntryToFile(addressBook, homePath);
+		Path homePath = Paths.get(HOME + name + ".csv");
+		addEntryToCsv(addressBook, homePath);
 
 		System.out.println("Successfully saved your addressBook.... Wanna add more addressBooks !?");
 		System.out.println("1 - yes , 2 - no");
 		return sc.nextInt() == 1;
 	}
 
-	private void addEntryToFile(AddressBook addressBook, Path filePath) throws IOException {
-		StringBuilder contactString = new StringBuilder();
-		addressBook.getContacts().forEach(contact -> contactString.append("\n").append(contact.toString()));
-		Files.write(filePath, contactString.toString().getBytes(), StandardOpenOption.APPEND,
-				StandardOpenOption.CREATE);
+	private void addEntryToCsv(AddressBook addressBook, Path filePath)
+			throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
+
+		try (Writer writer = Files.newBufferedWriter(filePath, StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
+			StatefulBeanToCsv<Contacts> beanToCsv = new StatefulBeanToCsvBuilder<Contacts>(writer)
+					.withQuotechar(CSVWriter.NO_QUOTE_CHARACTER).build();
+			beanToCsv.write(addressBook.getContacts());
+		}
 	}
 
-	public void readFile() throws IOException {
+	public Map<String, AddressBook> readCsv() throws IOException {
+
+		Map<String, AddressBook> map = new HashMap<>();
 		Path homePath = Paths.get(HOME);
-		Files.list(homePath).filter(Files::isRegularFile).forEach(file -> {
-			try (Stream<String> addressBook = Files.lines(file)) {
-				System.out.print(file.getFileName());
-				addressBook.forEach(System.out::println);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		});
+		Files.list(homePath).filter(path -> path.toFile().isFile() && path.toString().endsWith(".csv"))
+				.forEach(file -> {
+					try (Reader reader = Files.newBufferedReader(file)) {
+						CsvToBean<Contacts> csvToBean = new CsvToBeanBuilder<Contacts>(reader).withType(Contacts.class)
+								.build();
+
+						AddressBook addressBook = new AddressBook();
+						List<Contacts> contacts = new ArrayList<>();
+						Iterator<Contacts> itr = csvToBean.iterator();
+						while (itr.hasNext()) {
+							contacts.add(itr.next());
+						}
+						addressBook.setContacts(contacts);
+						map.put(file.getFileName().toString().split(".csv")[0], addressBook);
+
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				});
+		return map;
 	}
 
 	public boolean checkIfContactExists(Contacts contact, AddressBook addressBook) {

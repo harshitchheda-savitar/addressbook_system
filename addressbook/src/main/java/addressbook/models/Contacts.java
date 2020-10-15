@@ -1,8 +1,5 @@
 package addressbook.models;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class Contacts {
 
 	private String firstName;
@@ -11,8 +8,8 @@ public class Contacts {
 	private String city;
 	private String state;
 	private String zip;
-	private List<String> mobNo;
-	private List<String> emailId;
+	private String mobNo;
+	private String emailId;
 	private String adhaarNumber;
 
 	public String getFirstName() {
@@ -63,19 +60,19 @@ public class Contacts {
 		this.zip = zip;
 	}
 
-	public List<String> getMobNo() {
+	public String getMobNo() {
 		return mobNo;
 	}
 
-	public void setMobNo(List<String> mobNo) {
+	public void setMobNo(String mobNo) {
 		this.mobNo = mobNo;
 	}
 
-	public List<String> getEmailId() {
+	public String getEmailId() {
 		return emailId;
 	}
 
-	public void setEmailId(List<String> emailId) {
+	public void setEmailId(String emailId) {
 		this.emailId = emailId;
 	}
 
@@ -98,17 +95,16 @@ public class Contacts {
 		if (this.mobNo == null)
 			return "{firstName:" + this.firstName + ",lastName:" + this.lastName + ",adhaar:" + this.adhaarNumber
 					+ ",address:" + this.address + ",city:" + this.city + ",state:" + this.state + ",zip:" + this.zip
-					+ ",phoneNumbers:" + "null" + ",emails:" + Arrays.toString(this.emailId.toArray()) + "}";
+					+ ",phoneNumbers:" + "null" + ",emails:" + this.emailId + "}";
 
 		if (this.emailId == null)
 			return "{firstName:" + this.firstName + ",lastName:" + this.lastName + ",adhaar:" + this.adhaarNumber
 					+ ",address:" + this.address + ",city:" + this.city + ",state:" + this.state + ",zip:" + this.zip
-					+ ",phoneNumbers:" + Arrays.toString(this.mobNo.toArray()) + ",emails:" + "null" + "}";
+					+ ",phoneNumbers:" + this.mobNo + ",emails:" + "null" + "}";
 
 		return "{firstName:" + this.firstName + ",lastName:" + this.lastName + ",adhaar:" + this.adhaarNumber
 				+ ",address:" + this.address + ",city:" + this.city + ",state:" + this.state + ",zip:" + this.zip
-				+ ",phoneNumbers:" + Arrays.toString(this.mobNo.toArray()) + ",emails:"
-				+ Arrays.toString(this.emailId.toArray()) + "}";
+				+ ",phoneNumbers:" + this.mobNo + ",emails:" + this.emailId + "}";
 	}
 
 	@Override

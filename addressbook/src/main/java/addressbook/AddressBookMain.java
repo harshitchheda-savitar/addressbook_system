@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import com.opencsv.exceptions.CsvDataTypeMismatchException;
+import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
+
 import addressbook.models.AddressBook;
 import addressbook.models.Contacts;
 import addressbook.services.AddressBookService;
@@ -18,7 +21,8 @@ public class AddressBookMain {
 	static final int BULK_ADD = 4;
 	static final int ADD_ADDRESSBOOK = 5;
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args)
+			throws IOException, CsvDataTypeMismatchException, CsvRequiredFieldEmptyException {
 		AddressBookService addressBookService = new AddressBookService();
 
 		// initialize an address-book
@@ -86,6 +90,9 @@ public class AddressBookMain {
 			}
 		}
 
+		// Read the addressBook-list for file-System
+		addressBookMap = addressBookService.readCsv();
+
 		// Print the addressBookMap
 		System.out.println(addressBookMap.toString());
 
@@ -101,8 +108,6 @@ public class AddressBookMain {
 
 		// sort addressBook by location
 		addressBookService.sortByLocation(addressBookMap);
-		
-		//Read the addressBook-list for file-System
-		addressBookService.readFile();
+
 	}
 }
