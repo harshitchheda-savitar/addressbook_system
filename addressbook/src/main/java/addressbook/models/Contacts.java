@@ -15,6 +15,23 @@ public class Contacts {
 	private List<String> emailId;
 	private String adhaarNumber;
 
+	public Contacts() {
+	}
+
+	public Contacts(String firstName, String lastName, String address, String city, String state, String zip,
+			List<String> mobNo, List<String> emailId, String adhaarNumber) {
+		super();
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.address = address;
+		this.city = city;
+		this.state = state;
+		this.zip = zip;
+		this.mobNo = mobNo;
+		this.emailId = emailId;
+		this.adhaarNumber = adhaarNumber;
+	}
+
 	public String getFirstName() {
 		return firstName;
 	}
