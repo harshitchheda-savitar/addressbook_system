@@ -10,4 +10,8 @@ public class QueryConstants {
 	public static final String GET_ALL_CONTACTS = "SELECT C.id,C.first_name,C.last_name,C.aadhar,C.address,C.city,C.state,C.zip FROM contact C INNER JOIN address_book A ON A.id = C.addressbook_name_id WHERE A.is_active = 1 AND C.is_active = 1 AND A.id = ?";
 	public static final String GET_ALL_PHONE_LIST = "SELECT M.phone_number FROM contact C INNER JOIN mobile_data M ON M.contact_id = C.id WHERE C.is_active = 1 AND C.id = ?";
 	public static final String GET_ALL_EMAIL_LIST = "SELECT E.email_id FROM contact C INNER JOIN email_data E ON E.contact_id = C.id WHERE C.is_active = 1 AND C.id = ?";
+	public static final String UPDATE_CONTACT_DETAILS = "UPDATE contact C INNER JOIN address_book A ON A.id=C.addressbook_name_id SET C.first_name = ? AND C.last_name = ? AND C.aadhar = ? AND C.address = ? AND C.city = ? AND C.state = ? AND C.zip = ? WHERE A.is_active = 1 AND C.is_active = 1 AND A.addressbook_name = ? AND A.addressbook_type_id = ?";
+	public static final String DELETE_PHONE_LIST = "DELETE FROM mobile_data WHERE contact_id = ?";
+	public static final String DELETE_EMAIL_LIST = "DELETE FROM email_data WHERE contact_id = ?";
+	public static final String DELETE_CONTACT = "UPDATE contact C INNER JOIN address_book A ON A.id = C.addressbook_name_id SET C.is_active = 0 WHERE C.first_name = ? AND C.last_name = ? AND C.aadhar = ? AND A.addressbook_name = ? AND A.addressbook_type_id = ?";
 }
