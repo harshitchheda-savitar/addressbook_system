@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Contacts {
-
+	private int id;
 	private String firstName;
 	private String lastName;
 	private String address;
@@ -18,9 +18,9 @@ public class Contacts {
 	public Contacts() {
 	}
 
-	public Contacts(String firstName, String lastName, String address, String city, String state, String zip,
+	public Contacts(int id, String firstName, String lastName, String address, String city, String state, String zip,
 			List<String> mobNo, List<String> emailId, String adhaarNumber) {
-		super();
+		this.setId(id);
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.address = address;
@@ -30,6 +30,14 @@ public class Contacts {
 		this.mobNo = mobNo;
 		this.emailId = emailId;
 		this.adhaarNumber = adhaarNumber;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public String getFirstName() {
