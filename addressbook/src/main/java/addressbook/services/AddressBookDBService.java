@@ -2,7 +2,9 @@ package addressbook.services;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -83,6 +85,59 @@ public class AddressBookDBService {
 		return emailList;
 	}
 
+	public void deletePhoneDetails(String contactId, DBStatementType statementType) throws SQLException {
+		DB db = new DB();
+		deletePhoneDetailsFromDB(db, contactId, statementType);
+		db.closeInstance();
+	}
+
+	private void deletePhoneDetailsFromDB(DB db, String contactId, DBStatementType statementType) throws SQLException {
+		List<String> inParams = new ArrayList<>();
+		inParams.add(contactId);
+		db.updateTable(QueryConstants.DELETE_PHONE_LIST, inParams, statementType);
+	}
+
+	public void deleteEmailDetails(String contactId, DBStatementType statementType) throws SQLException {
+		DB db = new DB();
+		deleteEmailDetailsFromDB(db, contactId, statementType);
+		db.closeInstance();
+	}
+
+	private void deleteEmailDetailsFromDB(DB db, String contactId, DBStatementType statementType) throws SQLException {
+		List<String> inParams = new ArrayList<>();
+		inParams.add(contactId);
+		db.updateTable(QueryConstants.DELETE_EMAIL_LIST, inParams, statementType);
+	}
+
+	public void insertPhoneDetails(String contactId, String phonenumber, DBStatementType statementType)
+			throws SQLException {
+		DB db = new DB();
+		insertPhoneDetailsFromDB(db, contactId, phonenumber, statementType);
+		db.closeInstance();
+	}
+
+	private void insertPhoneDetailsFromDB(DB db, String contactId, String phoneNumber, DBStatementType statementType)
+			throws SQLException {
+		List<String> inParams = new ArrayList<>();
+		inParams.add(contactId);
+		inParams.add(phoneNumber);
+		db.updateTable(QueryConstants.ADD_PHONE_NUMBER, inParams, statementType);
+	}
+
+	public void insertEmailDetails(String contactId, String email, DBStatementType statementType) throws SQLException {
+		DB db = new DB();
+		insertEmailDetailsFromDB(db, contactId, email, statementType);
+		db.closeInstance();
+	}
+
+	private void insertEmailDetailsFromDB(DB db, String contactId, String email, DBStatementType statementType)
+			throws SQLException {
+		List<String> inParams = new ArrayList<>();
+		inParams.add(contactId);
+		inParams.add(email);
+		db.updateTable(QueryConstants.ADD_EMAILS, inParams, statementType);
+	}
+
 	public void updateContact(String firstName, String lastName, String aadhar, String address, String city,
 			String state, String zipCode, String[] mobiles, String[] emails, String addressbookName, String type,
 			DBStatementType statementType) throws SQLException {
@@ -106,44 +161,27 @@ public class AddressBookDBService {
 			AddressBook addressbook = getAddressBook(addressbookList, addressbookName, type);
 			Contacts contact = getContact(addressbook, firstName, lastName, aadhar);
 			if (contact != null) {
-				try {
-					List<String> phoneNumberList = new ArrayList<>();
-					List<String> emailList = new ArrayList<>();
-					inParams.clear();
-					inParams.add(Integer.toString(contact.getId()));
-					db.updateTable(QueryConstants.DELETE_PHONE_LIST, inParams, statementType);
-					for (String phoneNumber : mobiles) {
-						inParams.clear();
-						inParams.add(Integer.toString(contact.getId()));
-						inParams.add(phoneNumber);
-						db.insertIntoTable(QueryConstants.ADD_PHONE_NUMBER, inParams, statementType);
-						phoneNumberList.add(phoneNumber);
-					}
-					inParams.clear();
-					inParams.add(Integer.toString(contact.getId()));
-					db.updateTable(QueryConstants.DELETE_EMAIL_LIST, inParams, statementType);
-					for (String email : emails) {
-						inParams.clear();
-						inParams.add(Integer.toString(contact.getId()));
-						inParams.add(email);
-						db.insertIntoTable(QueryConstants.ADD_EMAILS, inParams, statementType);
-						emailList.add(email);
-					}
-					contact.setFirstName(firstName);
-					contact.setLastName(lastName);
-					contact.setAdhaarNumber(aadhar);
-					contact.setAddress(address);
-					contact.setCity(city);
-					contact.setState(state);
-					contact.setZip(zipCode);
-					contact.setMobNo(phoneNumberList);
-					contact.setEmailId(emailList);
-				} catch (Exception e) {
-					db.getConn()
-							.rollback();
-					db.closeInstance();
-					return;
+				List<String> phoneNumberList = new ArrayList<>();
+				List<String> emailList = new ArrayList<>();
+				deletePhoneDetails(Integer.toString(contact.getId()), statementType);
+				for (String phoneNumber : mobiles) {
+					insertPhoneDetailsFromDB(db, Integer.toString(contact.getId()), phoneNumber, statementType);
+					phoneNumberList.add(phoneNumber);
 				}
+				deleteEmailDetails(Integer.toString(contact.getId()), statementType);
+				for (String email : emails) {
+					insertPhoneDetailsFromDB(db, Integer.toString(contact.getId()), email, statementType);
+					emailList.add(email);
+				}
+				contact.setFirstName(firstName);
+				contact.setLastName(lastName);
+				contact.setAdhaarNumber(aadhar);
+				contact.setAddress(address);
+				contact.setCity(city);
+				contact.setState(state);
+				contact.setZip(zipCode);
+				contact.setMobNo(phoneNumberList);
+				contact.setEmailId(emailList);
 			} else
 				throw new Exception();
 		} catch (Exception e) {
@@ -177,6 +215,69 @@ public class AddressBookDBService {
 		db.closeInstance();
 	}
 
+	public void addContactUsingThread(List<Object[]> contactList, DBStatementType statementType) {
+		Map<Integer, Boolean> contactAdditionStatus = new HashMap<>();
+		contactList.forEach(contact -> {
+			Runnable task = () -> {
+				try {
+					contactAdditionStatus.put(contact.hashCode(), false);
+					addContact((String) contact[0], (String) contact[1], (String) contact[2], (String) contact[3],
+							(String) contact[4], (String) contact[5], (String) contact[6], (String[]) contact[7],
+							(String[]) contact[8], (String) contact[9], (String) contact[10], statementType);
+					contactAdditionStatus.put(contact.hashCode(), true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			};
+			Thread thread = new Thread(task, (String) contact[0] + (String) contact[1]);
+			thread.start();
+		});
+		while (contactAdditionStatus.containsValue(false)) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+			}
+		}
+	}
+
+	public int addContactToAddressBook(String firstName, String lastName, String aadhar, String address, String city,
+			String state, String zipCode, String addressbookId, DBStatementType statementType) throws SQLException {
+		DB db = new DB();
+		int contactId = addContactToAddressBookInDB(db, firstName, lastName, aadhar, address, city, state, zipCode,
+				addressbookId, statementType);
+		db.closeInstance();
+		return contactId;
+	}
+
+	private int addContactToAddressBookInDB(DB db, String firstName, String lastName, String aadhar, String address,
+			String city, String state, String zipCode, String addressbookId, DBStatementType statementType)
+			throws SQLException {
+		List<String> inParams = new ArrayList<>();
+		inParams.add(firstName);
+		inParams.add(lastName);
+		inParams.add(aadhar);
+		inParams.add(address);
+		inParams.add(city);
+		inParams.add(state);
+		inParams.add(zipCode);
+		inParams.add(addressbookId);
+
+		return db.insertIntoTable(QueryConstants.ADD_CONTACT, inParams, statementType);
+	}
+
+	private int getAddressBookId(DB db, String addressbookName, String type, DBStatementType statementType)
+			throws SQLException {
+		List<String> inParams = new ArrayList<>();
+		inParams.add(addressbookName);
+		inParams.add(Integer.toString(Constants.ADDRESSBOOK_TYPE_MAP.get(type)));
+		List<Map<String, Object>> resultset = db.getResultSet(QueryConstants.GET_ADDRESSBOOK_ID, inParams,
+				statementType);
+		if (resultset.size() > 0)
+			return (int) resultset.get(0)
+					.get("id");
+		return 0;
+	}
+
 	public void addContact(String firstName, String lastName, String aadhar, String address, String city, String state,
 			String zipCode, String[] mobiles, String[] emails, String addressbookName, String type,
 			DBStatementType statementType) throws SQLException {
@@ -187,54 +288,28 @@ public class AddressBookDBService {
 		db.getConn()
 				.setAutoCommit(false);
 		try {
-			int addressbookId = db.insertIntoTable(QueryConstants.ADD_ADDRESSBOOK, inParams, statementType);
+			int addressbookId = getAddressBookId(db, addressbookName, type, statementType);
+			if (addressbookId == 0)
+				addressbookId = db.insertIntoTable(QueryConstants.ADD_ADDRESSBOOK, inParams, statementType);
 			if (addressbookId > 0) {
-				inParams.clear();
-				inParams.add(firstName);
-				inParams.add(lastName);
-				inParams.add(aadhar);
-				inParams.add(address);
-				inParams.add(city);
-				inParams.add(state);
-				inParams.add(zipCode);
-				inParams.add(Integer.toString(addressbookId));
-				try {
-					int newlyInsertedId = db.insertIntoTable(QueryConstants.ADD_CONTACT, inParams, statementType);
-					if (newlyInsertedId > 0) {
-						List<String> phoneNumberList = new ArrayList<>();
-						List<String> emailList = new ArrayList<>();
-						try {
-							for (String phoneNumber : mobiles) {
-								inParams.clear();
-								inParams.add(Integer.toString(newlyInsertedId));
-								inParams.add(phoneNumber);
-								db.insertIntoTable(QueryConstants.ADD_PHONE_NUMBER, inParams, statementType);
-								phoneNumberList.add(phoneNumber);
-							}
-							for (String email : emails) {
-								inParams.clear();
-								inParams.add(Integer.toString(newlyInsertedId));
-								inParams.add(email);
-								db.insertIntoTable(QueryConstants.ADD_EMAILS, inParams, statementType);
-								emailList.add(email);
-							}
-							addAddressBookToList(new Contacts(newlyInsertedId, firstName, lastName, address, city,
-									state, zipCode, phoneNumberList, emailList, aadhar), addressbookName, type);
-						} catch (Exception e) {
-							db.getConn()
-									.rollback();
-							db.closeInstance();
-							return;
-						}
+				int newlyInsertedId = addContactToAddressBookInDB(db, firstName, lastName, aadhar, address, city, state,
+						zipCode, Integer.toString(addressbookId), statementType);
+				if (newlyInsertedId > 0) {
+					List<String> phoneNumberList = new ArrayList<>();
+					List<String> emailList = new ArrayList<>();
+					for (String phoneNumber : mobiles) {
+						insertPhoneDetailsFromDB(db, Integer.toString(newlyInsertedId), phoneNumber, statementType);
+						phoneNumberList.add(phoneNumber);
 					}
-				} catch (SQLException e) {
-					db.getConn()
-							.rollback();
-					db.closeInstance();
-					return;
+					for (String email : emails) {
+						insertEmailDetailsFromDB(db, Integer.toString(newlyInsertedId), email, statementType);
+						emailList.add(email);
+					}
+					addAddressBookToList(new Contacts(newlyInsertedId, firstName, lastName, address, city, state,
+							zipCode, phoneNumberList, emailList, aadhar), addressbookName, type);
 				}
 			}
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			db.getConn()
 					.rollback();
 			db.closeInstance();
@@ -251,7 +326,8 @@ public class AddressBookDBService {
 			addressbook.getContacts()
 					.add(contact);
 		} else {
-			addressbookList.add(new AddressBook(addressBookName, addressBookType, Collections.singletonList(contact)));
+			addressbookList
+					.add(new AddressBook(addressBookName, addressBookType, new ArrayList<>(Arrays.asList(contact))));
 		}
 	}
 
