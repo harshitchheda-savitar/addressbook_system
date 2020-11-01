@@ -16,4 +16,5 @@ public class QueryConstants {
 	public static final String DELETE_CONTACT = "UPDATE contact C INNER JOIN address_book A ON A.id = C.addressbook_name_id SET C.is_active = 0 WHERE C.first_name = ? AND C.last_name = ? AND C.aadhar = ? AND A.addressbook_name = ? AND A.addressbook_type_id = ?";
 	public static final String GET_CITY_COUNT = "SELECT city,COUNT(city) AS city_count FROM contact GROUP BY city";
 	public static final String GET_STATE_COUNT = "SELECT state,COUNT(state) AS state_count FROM contact GROUP BY state";
+	public static final String GET_ADDRESSBOOK_ID = "SELECT id FROM address_book WHERE addressbook_name =? AND addressbook_type_id = ? AND is_active = 1";
 }
