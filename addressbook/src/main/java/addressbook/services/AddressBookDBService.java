@@ -151,6 +151,9 @@ public class AddressBookDBService {
 		inParams.add(zipCode);
 		inParams.add(addressbookName);
 		inParams.add(Integer.toString(Constants.ADDRESSBOOK_TYPE_MAP.get(type)));
+		inParams.add(firstName);
+		inParams.add(lastName);
+		inParams.add(aadhar);
 		DB db = new DB();
 		db.getConn()
 				.setAutoCommit(false);
@@ -343,7 +346,7 @@ public class AddressBookDBService {
 		return addressbook;
 	}
 
-	private Contacts getContact(AddressBook addressbook, String firstName, String lastName, String aadhar) {
+	public Contacts getContact(AddressBook addressbook, String firstName, String lastName, String aadhar) {
 		if (addressbook != null) {
 			Contacts contacts = addressbook.getContacts()
 					.stream()
