@@ -155,8 +155,7 @@ public class AddressBookDBService {
 		inParams.add(lastName);
 		inParams.add(aadhar);
 		DB db = new DB();
-		db.getConn()
-				.setAutoCommit(false);
+		db.getConn().setAutoCommit(false);
 		try {
 			int result = db.updateTable(QueryConstants.UPDATE_CONTACT_DETAILS, inParams, statementType);
 			if (result == 0)
@@ -188,13 +187,11 @@ public class AddressBookDBService {
 			} else
 				throw new Exception();
 		} catch (Exception e) {
-			db.getConn()
-					.rollback();
+			db.getConn().rollback();
 			db.closeInstance();
 			return;
 		}
-		db.getConn()
-				.commit();
+		db.getConn().commit();
 		db.closeInstance();
 	}
 
@@ -213,8 +210,7 @@ public class AddressBookDBService {
 		AddressBook addressbook = getAddressBook(addressbookList, addressbookName, type);
 		Contacts contact = getContact(addressbook, firstName, lastName, aadhar);
 		if (contact != null)
-			addressbook.getContacts()
-					.remove(contact);
+			addressbook.getContacts().remove(contact);
 		db.closeInstance();
 	}
 
@@ -276,8 +272,7 @@ public class AddressBookDBService {
 		List<Map<String, Object>> resultset = db.getResultSet(QueryConstants.GET_ADDRESSBOOK_ID, inParams,
 				statementType);
 		if (resultset.size() > 0)
-			return (int) resultset.get(0)
-					.get("id");
+			return (int) resultset.get(0).get("id");
 		return 0;
 	}
 
@@ -288,8 +283,7 @@ public class AddressBookDBService {
 		List<String> inParams = new ArrayList<>();
 		inParams.add(addressbookName);
 		inParams.add(Integer.toString(Constants.ADDRESSBOOK_TYPE_MAP.get(type)));
-		db.getConn()
-				.setAutoCommit(false);
+		db.getConn().setAutoCommit(false);
 		try {
 			int addressbookId = getAddressBookId(db, addressbookName, type, statementType);
 			if (addressbookId == 0)
@@ -313,21 +307,18 @@ public class AddressBookDBService {
 				}
 			}
 		} catch (Exception e) {
-			db.getConn()
-					.rollback();
+			db.getConn().rollback();
 			db.closeInstance();
 			return;
 		}
-		db.getConn()
-				.commit();
+		db.getConn().commit();
 		db.closeInstance();
 	}
 
 	private void addAddressBookToList(Contacts contact, String addressBookName, String addressBookType) {
 		AddressBook addressbook = getAddressBook(addressbookList, addressBookName, addressBookType);
 		if (addressbook != null) {
-			addressbook.getContacts()
-					.add(contact);
+			addressbook.getContacts().add(contact);
 		} else {
 			addressbookList
 					.add(new AddressBook(addressBookName, addressBookType, new ArrayList<>(Arrays.asList(contact))));
@@ -337,29 +328,36 @@ public class AddressBookDBService {
 	public AddressBook getAddressBook(List<AddressBook> addressbookList, String addressBookName,
 			String addressBookType) {
 		AddressBook addressbook = addressbookList.stream()
-				.filter(addressBook -> addressBook.getName()
-						.equals(addressBookName)
-						&& addressBook.getType()
-								.equals(addressBookType))
-				.findFirst()
-				.orElse(null);
+				.filter(addressBook -> addressBook.getName().equals(addressBookName)
+						&& addressBook.getType().equals(addressBookType))
+				.findFirst().orElse(null);
 		return addressbook;
 	}
 
 	public Contacts getContact(AddressBook addressbook, String firstName, String lastName, String aadhar) {
 		if (addressbook != null) {
-			Contacts contacts = addressbook.getContacts()
-					.stream()
-					.filter(contact -> contact.getFirstName()
-							.equals(firstName)
-							&& contact.getLastName()
-									.equals(lastName)
-							&& contact.getAdhaarNumber()
-									.equals(aadhar))
-					.findFirst()
-					.orElse(null);
+			Contacts contacts = addressbook.getContacts().stream()
+					.filter(contact -> contact.getFirstName().equals(firstName)
+							&& contact.getLastName().equals(lastName) && contact.getAdhaarNumber().equals(aadhar))
+					.findFirst().orElse(null);
 			return contacts;
 		}
 		return null;
+	}
+
+	public List<AddressBook> addToCacheList(List<AddressBook> addressBooks) {
+		if (addressbookList == null || addressbookList.size() == 0)
+			addressbookList = new ArrayList<>(addressBooks);
+		else
+			addressbookList.addAll(addressBooks);
+		return addressbookList;
+	}
+
+	public int countEntries() {
+		return addressbookList.size();
+	}
+
+	public void removeFromList(AddressBook addressBook) {
+		addressbookList.remove(addressBook);
 	}
 }
